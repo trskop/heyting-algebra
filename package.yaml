@@ -1,0 +1,7 @@
+name: heyting-algebra
+
+dependencies:
+  - base
+
+library:
+  source-dirs: src
