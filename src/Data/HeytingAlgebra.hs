@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
 -- |
 -- Module:      Data.HeytingAlgebra
 -- Description: TODO: Module synopsis
@@ -13,15 +14,46 @@
 --
 -- TODO: Module description.
 module Data.HeytingAlgebra
---  (
---  )
+    ( HeytingAlgebra(..)
+
+    , ff
+    , false
+
+    , tt
+    , true
+
+    , not
+    , neg
+
+    , (&&)
+    , (/\)
+
+    , (||)
+    , (\/)
+
+    , (-->)
+    , (<-->)
+
+    , All(..)
+    , and
+    , all
+
+    , Any(..)
+    , or
+    , any
+    )
   where
 
 import Data.Bool (Bool(False, True))
 import qualified Data.Bool as Bool ((&&), (||), not)
+import Data.Coerce (Coercible, coerce)
+import Data.Foldable (Foldable, foldMap)
 import Data.Function ((.), const)
+import Data.Functor (Functor(..))
+import Data.Functor.Identity (Identity(Identity))
 import Data.Functor.Const (Const(Const))
-import Data.Coerce (coerce)
+import Data.Monoid (Monoid(..))
+import Data.Semigroup (Semigroup(..))
 
 import Data.Functor.Contravariant
   ( Equivalence(Equivalence)
@@ -133,3 +165,75 @@ infixr 1 -->
 (<-->) :: HeytingAlgebra a => a -> a -> a
 (<-->) = biconditional
 infixr 0 <-->
+
+-- {{{ All --------------------------------------------------------------------
+
+newtype All a = All {getAll :: a}
+
+instance Functor All where
+    fmap = coerce2 @Identity #. fmap
+        -- coerce2 is actually discarded and the coerce in (#.) is used.
+
+instance HeytingAlgebra a => Semigroup (All a) where
+    (<>) = coerce (conjunction @a)
+
+instance HeytingAlgebra a => Monoid (All a) where
+    mempty = coerce (top @a)
+    mappend = (<>)
+
+instance HeytingAlgebra a => HeytingAlgebra (All a) where
+    bottom = coerce (bottom @a)
+    top = coerce (top @a)
+    negation = coerce (negation @a)
+    conjunction = coerce (conjunction @a)
+    disjunction = coerce (disjunction @a)
+    implication = coerce (implication @a)
+
+and :: (Foldable t, HeytingAlgebra a) => t a -> a
+and = getAll #. foldMap All
+
+all :: (Foldable t, HeytingAlgebra b) => (a -> b) -> t a -> b
+all f = getAll #. foldMap (All #. f)
+
+-- }}} All --------------------------------------------------------------------
+
+-- {{{ Any --------------------------------------------------------------------
+
+newtype Any a = Any {getAny :: a}
+
+instance Functor Any where
+    fmap = coerce2 @Identity #. fmap
+        -- coerce2 is actually discarded and the coerce in (#.) is used.
+
+instance HeytingAlgebra a => Semigroup (Any a) where
+    (<>) = coerce (disjunction @a)
+
+instance HeytingAlgebra a => Monoid (Any a) where
+    mempty = coerce (bottom @a)
+    mappend = (<>)
+
+instance HeytingAlgebra a => HeytingAlgebra (Any a) where
+    bottom = coerce (bottom @a)
+    top = coerce (top @a)
+    negation = coerce (negation @a)
+    conjunction = coerce (conjunction @a)
+    disjunction = coerce (disjunction @a)
+    implication = coerce (implication @a)
+
+or :: (Foldable t, HeytingAlgebra a) => t a -> a
+or = getAny #. foldMap Any
+
+any :: (Foldable t, HeytingAlgebra b) => (a -> b) -> t a -> b
+any f = getAny #. foldMap (Any #. f)
+
+-- }}} Any --------------------------------------------------------------------
+
+(#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
+(#.) _ = coerce
+
+coerce2
+  :: forall f t a b
+  .  Coercible (f a -> f b) (t a -> t b)
+  => (f a -> f b)
+  -> (t a -> t b)
+coerce2 = coerce
