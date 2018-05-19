@@ -1,4 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 -- |
 -- Module:      Data.HeytingAlgebra
 -- Description: TODO: Module synopsis
@@ -18,6 +20,13 @@ module Data.HeytingAlgebra
 import Data.Bool (Bool(False, True))
 import qualified Data.Bool as Bool ((&&), (||), not)
 import Data.Function ((.), const)
+import Data.Functor.Const (Const(Const))
+import Data.Coerce (coerce)
+
+import Data.Functor.Contravariant
+  ( Equivalence(Equivalence)
+  , Predicate(Predicate)
+  )
 
 
 class HeytingAlgebra a where
@@ -51,6 +60,14 @@ instance HeytingAlgebra () where
     disjunction _ _ = ()
     implication _ _ = ()
 
+instance HeytingAlgebra b => HeytingAlgebra (Const b a) where
+    bottom = coerce (bottom @b)
+    top = coerce (top @b)
+    negation = coerce (negation @b)
+    conjunction = coerce (conjunction @b)
+    disjunction = coerce (disjunction @b)
+    implication = coerce (implication @b)
+
 instance HeytingAlgebra b => HeytingAlgebra (a -> b) where
     bottom = const bottom
     top = const bottom
@@ -58,6 +75,22 @@ instance HeytingAlgebra b => HeytingAlgebra (a -> b) where
     conjunction f g a = f a `conjunction` g a
     disjunction f g a = f a `disjunction` g a
     implication f g a = f a `implication` g a
+
+instance HeytingAlgebra (Predicate a) where
+    bottom = coerce (bottom @(a -> Bool))
+    top = coerce (top @(a -> Bool))
+    negation = coerce (negation @(a -> Bool))
+    conjunction = coerce (conjunction @(a -> Bool))
+    disjunction = coerce (disjunction @(a -> Bool))
+    implication = coerce (implication @(a -> Bool))
+
+instance HeytingAlgebra (Equivalence a) where
+    bottom = coerce (bottom @(a -> Predicate a))
+    top = coerce (top @(a -> Predicate a))
+    negation = coerce (negation @(a -> Predicate a))
+    conjunction = coerce (conjunction @(a -> Predicate a))
+    disjunction = coerce (disjunction @(a -> Predicate a))
+    implication = coerce (implication @(a -> Predicate a))
 
 ff :: HeytingAlgebra a => a
 ff = bottom

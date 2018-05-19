@@ -2,6 +2,7 @@ name: heyting-algebra
 
 dependencies:
   - base
+  - contravariant
 
 library:
   source-dirs: src
