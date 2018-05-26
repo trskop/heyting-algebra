@@ -12,7 +12,17 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO: Module description.
+-- /Heyting algebra/ is a formalisation of /Intuitionistic logic/ which can be
+-- seen as a restriction of classical logic in which the law of excluded middle
+-- and double negation elimination have been removed. Excluded middle and
+-- double negation elimination can still be proved for some propositions on a
+-- case by case basis, however, but do not hold universally as they do with
+-- classical logic.
+--
+-- == Related information
+--
+-- * [Wikipedia: Heyting algebra](https://en.wikipedia.org/wiki/Heyting_algebra)
+-- * [Wikipedia: Intuitionistic logic](https://en.wikipedia.org/wiki/Intuitionistic_logic)
 module Data.HeytingAlgebra
     ( HeytingAlgebra(..)
 
@@ -61,16 +71,106 @@ import Data.Functor.Contravariant
   )
 
 
+-- | /Heyting algebra/ is defined as a bounted lattice with 'implication'
+-- ('-->') operator. Importantly, every /Boolean algebra/ is a
+-- /Heyting algebra/ when 'implication' ('-->') is defined as:
+--
+-- @
+-- ∀ a b. a '-->' b ≡ 'neg' a '\/' b
+-- @
+--
+-- == Axioms
+--
+-- === Commutativity of \/\\ and \\\/
+--
+-- @
+-- ∀ a b. a '\/' b ≡ b '\/' a
+-- ∀ a b. a '/\' b ≡ b '/\' a
+-- @
+--
+-- === Associativity of \/\\ and \\\/
+--
+-- @
+-- ∀ a b. a '\/' (b '\/' c) ≡ (a '\/' b) '\/' c
+-- ∀ a b. a '/\' (b '/\' c) ≡ (a '/\' b) '/\' c
+-- @
+--
+-- === Absorbtion for \/\\ and \\\/
+--
+-- @
+-- ∀ a b. a '\/' (a '/\' b) ≡ a
+-- ∀ a b. a '/\' (a '\/' b) ≡ a
+-- @
+--
+-- === Idempotent \/\\ and \\\/
+--
+-- @
+-- ∀ a. a '\/' a  ≡ a
+-- ∀ a. a '/\' a  ≡ a
+-- @
+--
+-- === Identities for \/\\ and \\\/
+--
+-- @
+-- ∀ a. a '\/' 'false' ≡ 'false' '\/' a ≡ a
+-- ∀ a. a '/\' 'true'  ≡ 'false' '\/' a ≡ a
+-- @
+--
+-- === Implication
+--
+-- @
+-- ∀ a. a '-->' a ≡ 'true'
+-- ∀ a b. a '/\' (a '-->' b) ≡ a '/\' b
+-- ∀ a b. b '/\' (a '-->' b) ≡ b
+-- ∀ a b c. a '-->' (b '/\' c) ≡ (a '-->' b) '/\' (a '-->' c)
+-- @
+--
+-- @
+-- ∀ a. 'neg' a ≡ a '-->' 'false'
+-- @
 class HeytingAlgebra a where
+    {-# MINIMAL bottom, top, negation, conjunction, disjunction #-}
+
+    -- | Least element, behaves as neutral element for '\/' ('disjunction').
+    --
+    -- @
+    -- ∀ a. a '\/' 'bottom' ≡ 'bottom' '\/' a ≡ a
+    -- 'bottom' :: 'Bool' ≡ 'False'
+    -- @
+    --
+    -- Aliases: 'ff' and 'false'.
     bottom :: a
+
+    -- | Greatest element, behaves as neutral element for '/\' ('conjunction').
+    --
+    -- @
+    -- ∀ a. a '/\' 'top' ≡ 'top' '/\' a ≡ a
+    -- 'top' :: 'Bool' ≡ 'True'
+    -- @
+    --
+    -- Aliases: 'tt' and 'true'.
     top :: a
+
+    -- |
+    -- Aliases: 'neg' and 'not'.
     negation :: a -> a
+
+    -- |
+    --
+    -- Aliases: '/\' and '&&'.
     conjunction :: a -> a -> a
+
+    -- |
+    -- Aliases: '\/' and '||'.
     disjunction :: a -> a -> a
 
+    -- |
+    -- Aliases: '-->'
     implication :: a -> a -> a
     implication a b = negation (a `disjunction` b)
 
+    -- |
+    -- Aliases: '<-->'
     biconditional :: a -> a -> a
     biconditional a b =
         (a `conjunction` b) `disjunction` (negation a `conjunction` negation b)
