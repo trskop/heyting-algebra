@@ -198,14 +198,6 @@ instance HeytingAlgebra () where
     disjunction _ _ = ()
     implication _ _ = ()
 
-instance HeytingAlgebra b => HeytingAlgebra (Const b a) where
-    bottom = coerce (bottom @b)
-    top = coerce (top @b)
-    negation = coerce (negation @b)
-    conjunction = coerce (conjunction @b)
-    disjunction = coerce (disjunction @b)
-    implication = coerce (implication @b)
-
 instance HeytingAlgebra b => HeytingAlgebra (a -> b) where
     bottom = const bottom
     top = const bottom
@@ -213,6 +205,23 @@ instance HeytingAlgebra b => HeytingAlgebra (a -> b) where
     conjunction f g a = f a `conjunction` g a
     disjunction f g a = f a `disjunction` g a
     implication f g a = f a `implication` g a
+
+instance HeytingAlgebra a => HeytingAlgebra (Identity a) where
+    bottom = coerce (bottom @a)
+    top = coerce (top @a)
+    negation = coerce (negation @a)
+    conjunction = coerce (conjunction @a)
+    disjunction = coerce (disjunction @a)
+    implication = coerce (implication @a)
+    biconditional = coerce (biconditional @a)
+
+instance HeytingAlgebra b => HeytingAlgebra (Const b a) where
+    bottom = coerce (bottom @b)
+    top = coerce (top @b)
+    negation = coerce (negation @b)
+    conjunction = coerce (conjunction @b)
+    disjunction = coerce (disjunction @b)
+    implication = coerce (implication @b)
 
 instance HeytingAlgebra (Predicate a) where
     bottom = coerce (bottom @(a -> Bool))
