@@ -178,9 +178,7 @@ class HeytingAlgebra a where
     -- |
     -- Aliases: '<-->'
     biconditional :: a -> a -> a
-    biconditional a b =
-        (a `conjunction` b) `disjunction` (negation a `conjunction` negation b)
-        -- = (a /\ b) \/ (-.a /\ -.b) = (a --> b) /\ (b --> a)
+    biconditional a b = (a `implication` b) `conjunction` (b `implication` a)
 
 instance HeytingAlgebra Bool where
     bottom = False
@@ -189,6 +187,8 @@ instance HeytingAlgebra Bool where
     conjunction = (Bool.&&)
     disjunction = (Bool.||)
     implication a b = Bool.not a Bool.|| b
+    biconditional a b = (a Bool.&& b) Bool.|| (Bool.not a Bool.&& Bool.not b)
+      -- = (a /\ b) \/ (-.a /\ -.b) = (a --> b) /\ (b --> a) = a <--> b
 
 instance HeytingAlgebra () where
     bottom = ()
@@ -197,6 +197,7 @@ instance HeytingAlgebra () where
     conjunction _ _ = ()
     disjunction _ _ = ()
     implication _ _ = ()
+    biconditional _ _ = ()
 
 instance HeytingAlgebra b => HeytingAlgebra (a -> b) where
     bottom = const bottom
@@ -205,6 +206,7 @@ instance HeytingAlgebra b => HeytingAlgebra (a -> b) where
     conjunction f g a = f a `conjunction` g a
     disjunction f g a = f a `disjunction` g a
     implication f g a = f a `implication` g a
+    biconditional f g a = f a `biconditional` g a
 
 instance HeytingAlgebra a => HeytingAlgebra (Identity a) where
     bottom = coerce (bottom @a)
@@ -222,6 +224,7 @@ instance HeytingAlgebra b => HeytingAlgebra (Const b a) where
     conjunction = coerce (conjunction @b)
     disjunction = coerce (disjunction @b)
     implication = coerce (implication @b)
+    biconditional = coerce (biconditional @b)
 
 instance HeytingAlgebra (Predicate a) where
     bottom = coerce (bottom @(a -> Bool))
@@ -230,6 +233,7 @@ instance HeytingAlgebra (Predicate a) where
     conjunction = coerce (conjunction @(a -> Bool))
     disjunction = coerce (disjunction @(a -> Bool))
     implication = coerce (implication @(a -> Bool))
+    biconditional = coerce (biconditional @(a -> Bool))
 
 instance HeytingAlgebra (Equivalence a) where
     bottom = coerce (bottom @(a -> Predicate a))
@@ -238,6 +242,7 @@ instance HeytingAlgebra (Equivalence a) where
     conjunction = coerce (conjunction @(a -> Predicate a))
     disjunction = coerce (disjunction @(a -> Predicate a))
     implication = coerce (implication @(a -> Predicate a))
+    biconditional = coerce (biconditional @(a -> Predicate a))
 
 ff :: HeytingAlgebra a => a
 ff = bottom
