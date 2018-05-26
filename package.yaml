@@ -1,8 +1,15 @@
 name: heyting-algebra
+version: 0.1.0.0
+synopsis: Heyting algebra
 
 dependencies:
   - base
   - contravariant
 
+ghc-options:
+  - -Wall
+
 library:
   source-dirs: src
+  other-modules:
+    - Data.HeytingAlgebra.Internal
