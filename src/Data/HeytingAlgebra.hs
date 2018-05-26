@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -44,6 +45,9 @@ module Data.HeytingAlgebra
     , (-->)
     , (<-->)
 
+    , fromBool
+    , toBool
+
     , All(..)
     , and
     , all
@@ -54,9 +58,10 @@ module Data.HeytingAlgebra
     )
   where
 
-import Data.Bool (Bool(False, True))
+import Data.Bool (Bool(False, True), otherwise)
 import qualified Data.Bool as Bool ((&&), (||), not)
 import Data.Coerce (Coercible, coerce)
+import Data.Eq (Eq, (==))
 import Data.Foldable (Foldable, foldMap)
 import Data.Function ((.), const)
 import Data.Functor (Functor(..))
@@ -64,6 +69,7 @@ import Data.Functor.Identity (Identity(Identity))
 import Data.Functor.Const (Const(Const))
 import Data.Monoid (Monoid(..))
 import Data.Semigroup (Semigroup(..))
+import Data.Maybe (Maybe(Just, Nothing))
 
 import Data.Functor.Contravariant
   ( Equivalence(Equivalence)
@@ -265,6 +271,27 @@ infixr 1 -->
 (<-->) :: HeytingAlgebra a => a -> a -> a
 (<-->) = biconditional
 infixr 0 <-->
+
+-- | Monotonic injection from 'Bool' into any 'HeytingAlgebra', i.e. preserves
+-- boolean operations.
+fromBool :: HeytingAlgebra a => Bool -> a
+fromBool = \case
+    False -> bottom
+    True -> top
+
+-- @
+-- forall a. 'HeytingAlgebra' a => 'toBool' @a . 'fromBool' @a ≡ 'Just' @Bool
+--
+-- forall a b. ('HeytingAlgebra' a, 'HeytingAlgebra' b) =>
+--   'fromBool' @b ('toBool' @a 'bottom') ≡ 'Just' @b 'bottom'
+--   'fromBool' @b ('toBool' @a 'top')    ≡ 'Just' @b 'top'
+--   'fromBool' @b ('toBool' @a other)  ≡ 'Nothing' @b
+-- @
+toBool :: (Eq a, HeytingAlgebra a) => a -> Maybe Bool
+toBool a
+  | a == bottom = Just False
+  | a == top    = Just True
+  | otherwise   = Nothing
 
 -- {{{ All --------------------------------------------------------------------
 
