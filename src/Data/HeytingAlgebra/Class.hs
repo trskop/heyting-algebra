@@ -114,7 +114,9 @@ import Data.Functor.Contravariant
 -- ∀ a. 'neg' a ≡ a '-->' 'false'
 -- @
 class HeytingAlgebra a where
-    {-# MINIMAL bottom, top, negation, conjunction, disjunction #-}
+    {-# MINIMAL
+          bottom, top, (negation | implication), conjunction, disjunction
+      #-}
 
     -- | Least element, behaves as neutral element for '\/' ('disjunction').
     --
@@ -140,7 +142,10 @@ class HeytingAlgebra a where
 
     -- |
     -- Aliases: 'neg' and 'Data.HeytingAlgebra.not'.
+    --
+    -- Default implementation: @\\a -> a '-->' 'false'@
     negation :: a -> a
+    negation = (`implication` bottom)
 
     -- |
     --

@@ -78,10 +78,10 @@ fromBool = \case
 -- @
 -- ∀ a. 'HeytingAlgebra' a => 'toBool' @a . 'fromBool' @a ≡ 'Just' @Bool
 --
--- ∀ a b. ('HeytingAlgebra' a, 'HeytingAlgebra' b) =>
---   'fromBool' @b ('toBool' @a 'false') ≡ 'Just' @b 'false'
---   'fromBool' @b ('toBool' @a 'true')  ≡ 'Just' @b 'true'
---   'fromBool' @b ('toBool' @a other)  ≡ 'Nothing' @b
+-- ∀ (a :: Type) (b :: Type). ('HeytingAlgebra' a, 'HeytingAlgebra' b) =>
+--   'fromBool' \@b ('toBool' \@a 'false') ≡ 'Just' \@b 'false'
+--   'fromBool' \@b ('toBool' \@a 'true')  ≡ 'Just' \@b 'true'
+--   'fromBool' \@b ('toBool' \@a other) ≡ 'Nothing' \@b
 -- @
 toBool :: (Eq a, HeytingAlgebra a) => a -> Maybe Bool
 toBool a
