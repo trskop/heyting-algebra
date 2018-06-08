@@ -1,6 +1,28 @@
 name: heyting-algebra
 version: 0.1.0.0
 synopsis: Heyting algebra
+category: Data
+description: |
+  We can think of /Heyting algebra/ as a generalisation of @Bool@ and its
+  boolean operations. The advantage is that we get other instances for
+  @HeytingAlgebra@ that are useful in practical programming.
+  .
+  /Heyting algebra/ is a formalisation of /Intuitionistic logic/ which can be
+  seen as a restriction of classical logic in which the law of excluded middle
+  and double negation elimination have been removed. Excluded middle and
+  double negation elimination can still be proved for some propositions on a
+  case by case basis, however, they do not hold universally as they do with
+  classical logic.
+
+github: trskop/heyting-algebra
+license: BSD3
+author: Peter Trško
+maintainer: peter.trsko@gmail.com
+copyright: (c) 2018 Peter Trško
+
+extra-source-files:
+  - ChangeLog.md
+  - README.md
 
 dependencies:
   - base

@@ -4,7 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 -- |
 -- Module:      Data.HeytingAlgebra
--- Description: TODO: Module synopsis
+-- Description: Heyting Algebra
 -- Copyright:   (c) 2018 Peter Trško
 -- License:     BSD3
 --
@@ -14,7 +14,8 @@
 --
 -- We can think of /Heyting algebra/ as a generalisation of 'Bool' and its
 -- boolean operations. The advantage is that we get other instances for
--- 'HeytingAlgebra' that are useful in practical programming.
+-- 'HeytingAlgebra' that are useful in practical programming. See
+-- [HeytingAlgebra Instances](#g:2) section for usage examples.
 module Data.HeytingAlgebra
     (
     -- * Heyting Algebra
@@ -22,6 +23,7 @@ module Data.HeytingAlgebra
       module Data.HeytingAlgebra.Class
 
     -- * HeytingAlgebra Instances
+    -- $instances
     , module Data.HeytingAlgebra.All
     , module Data.HeytingAlgebra.Any
 
@@ -79,9 +81,9 @@ fromBool = \case
 -- ∀ a. 'HeytingAlgebra' a => 'toBool' @a . 'fromBool' @a ≡ 'Just' @Bool
 --
 -- ∀ (a :: Type) (b :: Type). ('HeytingAlgebra' a, 'HeytingAlgebra' b) =>
---   'fromBool' \@b ('toBool' \@a 'false') ≡ 'Just' \@b 'false'
---   'fromBool' \@b ('toBool' \@a 'true')  ≡ 'Just' \@b 'true'
---   'fromBool' \@b ('toBool' \@a other) ≡ 'Nothing' \@b
+--   'fromBool' \@b ('toBool' \@a 'false') = 'Just' \@b 'false'
+--   'fromBool' \@b ('toBool' \@a 'true')  = 'Just' \@b 'true'
+--   'fromBool' \@b ('toBool' \@a other) = 'Nothing' \@b
 -- @
 toBool :: (Eq a, HeytingAlgebra a) => a -> Maybe Bool
 toBool a
@@ -121,22 +123,22 @@ toBool a
 --
 -- 'negation' ≡ 'neg' ≡ 'Data.Bool.not' :: 'Bool' -> 'Bool'
 --   where
---     'not' 'False' ≡ 'True'
---     'not' 'True'  ≡ 'False'
+--     'not' 'False' = 'True'
+--     'not' 'True'  = 'False'
 --
 -- 'conjunction' ≡ ('/\') ≡ ('Data.Bool.&&') :: 'Bool' -> 'Bool' -> 'Bool'
 --   where
---     'False' '&&' 'False' ≡ 'False'
---     'False' '&&' 'True'  ≡ 'False'
---     'True'  '&&' 'False' ≡ 'False'
---     'True'  '&&' 'True'  ≡ 'True'
+--     'False' '&&' 'False' = 'False'
+--     'False' '&&' 'True'  = 'False'
+--     'True'  '&&' 'False' = 'False'
+--     'True'  '&&' 'True'  = 'True'
 --
 -- 'disjunction' ≡ ('\/') ≡ ('Data.Bool.||') :: 'Bool' -> 'Bool' -> 'Bool'
 --   where
---     'False' '||' 'False' ≡ 'False'
---     'False' '||' 'True'  ≡ 'True'
---     'True'  '||' 'False' ≡ 'True'
---     'True'  '||' 'True'  ≡ 'True'
+--     'False' '||' 'False' = 'False'
+--     'False' '||' 'True'  = 'True'
+--     'True'  '||' 'False' = 'True'
+--     'True'  '||' 'True'  = 'True'
 --
 -- 'implication' ≡ ('-->') :: 'Bool' -> 'Bool' -> 'Bool'
 --   where
@@ -144,10 +146,10 @@ toBool a
 --       a '-->' b = 'not' a '||' b
 --
 --     i.e.:
---       'False' '-->' 'False' ≡ 'True'
---       'False' '-->' 'True'  ≡ 'True'
---       'True'  '-->' 'False' ≡ 'False'
---       'True'  '-->' 'True'  ≡ 'True'
+--       'False' '-->' 'False' = 'True'
+--       'False' '-->' 'True'  = 'True'
+--       'True'  '-->' 'False' = 'False'
+--       'True'  '-->' 'True'  = 'True'
 --
 -- 'biconditional' ≡ ('<-->') :: 'Bool' -> 'Bool' -> 'Bool'
 --   where
@@ -155,8 +157,8 @@ toBool a
 --       a '<-->' b = (a '-->' b) '&&' (b '-->' a)
 --
 --     i.e.:
---       'False' '-->' 'False' ≡ 'True'
---       'False' '-->' 'True'  ≡ 'False'
---       'True'  '-->' 'False' ≡ 'False'
---       'True'  '-->' 'True'  ≡ 'True'
+--       'False' '-->' 'False' = 'True'
+--       'False' '-->' 'True'  = 'False'
+--       'True'  '-->' 'False' = 'False'
+--       'True'  '-->' 'True'  = 'True'
 -- @

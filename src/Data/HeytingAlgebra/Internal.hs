@@ -3,7 +3,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 -- |
 -- Module:      Data.HeytingAlgebra.Internal
--- Description: TODO: Module synopsis
+-- Description: Internal helper functions
 -- Copyright:   (c) 2018 Peter Trško
 -- License:     BSD3
 --
@@ -11,7 +11,8 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO
+-- Internal helper functions used to simplify and optimise other parts of the
+-- code base.
 module Data.HeytingAlgebra.Internal
     ( (#.)
     , coerce2

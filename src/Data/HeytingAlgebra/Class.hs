@@ -4,7 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 -- |
 -- Module:      Data.HeytingAlgebra.Class
--- Description: TODO: Module synopsis
+-- Description: HeytingAlgebra type class
 -- Copyright:   (c) 2018 Peter Trško
 -- License:     BSD3
 --
@@ -16,7 +16,7 @@
 -- seen as a restriction of classical logic in which the law of excluded middle
 -- and double negation elimination have been removed. Excluded middle and
 -- double negation elimination can still be proved for some propositions on a
--- case by case basis, however, but do not hold universally as they do with
+-- case by case basis, however, they do not hold universally as they do with
 -- classical logic.
 --
 -- == Related information
@@ -40,6 +40,9 @@ module Data.HeytingAlgebra.Class
     , (\/)
     , (-->)
     , (<-->)
+
+    -- ** Other Operations
+    , xor
     )
   where
 
@@ -56,117 +59,188 @@ import Data.Functor.Contravariant
   )
 
 
--- | /Heyting algebra/ is defined as a bounded lattice with 'implication'
--- ('-->') operator. Importantly, every /Boolean algebra/ is a
--- /Heyting algebra/ when 'implication' ('-->') is defined as:
+-- | /Heyting algebra/ is defined as a distributive bounded lattice expanded
+-- with an operation @∀ p q. p → q@ ('implication', '-->'). Importantly, every
+-- /Boolean algebra/ is a /Heyting algebra/ when 'implication' ('-->') is
+-- defined as:
 --
 -- @
 -- ∀ a b. a '-->' b ≡ 'neg' a '\/' b
 -- @
 --
--- == Axioms
+-- === Axioms and Laws
 --
--- === Commutativity of \/\\ and \\\/
---
--- @
--- ∀ a b. a '\/' b ≡ b '\/' a
--- ∀ a b. a '/\' b ≡ b '/\' a
--- @
---
--- === Associativity of \/\\ and \\\/
+-- ==== Commutativity of \/\\ and \\\/
 --
 -- @
--- ∀ a b. a '\/' (b '\/' c) ≡ (a '\/' b) '\/' c
--- ∀ a b. a '/\' (b '/\' c) ≡ (a '/\' b) '/\' c
+-- ∀ a b. a '\/' b = b '\/' a
+-- ∀ a b. a '/\' b = b '/\' a
 -- @
 --
--- === Absorbtion for \/\\ and \\\/
+-- ==== Associativity of \/\\ and \\\/
 --
 -- @
--- ∀ a b. a '\/' (a '/\' b) ≡ a
--- ∀ a b. a '/\' (a '\/' b) ≡ a
+-- ∀ a b. a '\/' (b '\/' c) = (a '\/' b) '\/' c
+-- ∀ a b. a '/\' (b '/\' c) = (a '/\' b) '/\' c
 -- @
 --
--- === Idempotent \/\\ and \\\/
+-- ==== Absorbtion for \/\\ and \\\/
 --
 -- @
--- ∀ a. a '\/' a  ≡ a
--- ∀ a. a '/\' a  ≡ a
+-- ∀ a b. a '\/' (a '/\' b) = a
+-- ∀ a b. a '/\' (a '\/' b) = a
 -- @
 --
--- === Identities for \/\\ and \\\/
+-- ==== Idempotent \/\\ and \\\/
 --
 -- @
--- ∀ a. a '\/' 'false' ≡ 'false' '\/' a ≡ a
--- ∀ a. a '/\' 'true'  ≡ 'false' '\/' a ≡ a
+-- ∀ a. a '\/' a  = a
+-- ∀ a. a '/\' a  = a
 -- @
 --
--- === Implication
+-- ==== Identities for \/\\ and \\\/
 --
 -- @
--- ∀ a. a '-->' a ≡ 'true'
--- ∀ a b. a '/\' (a '-->' b) ≡ a '/\' b
--- ∀ a b. b '/\' (a '-->' b) ≡ b
--- ∀ a b c. a '-->' (b '/\' c) ≡ (a '-->' b) '/\' (a '-->' c)
+-- ∀ a. a '\/' 'false' = 'false' '\/' a ≡ a
+-- ∀ a. a '/\' 'true'  = 'false' '\/' a ≡ a
 -- @
 --
+-- ==== Distributivity for \/\\ and \\\/
+--
+-- Heyting algebra is a distributive lattice:
+--
 -- @
--- ∀ a. 'neg' a ≡ a '-->' 'false'
+-- ∀ a b c. a '\/' (b '/\' c) = (a '\/' b) '/\' (b '\/' c)
+-- ∀ a b c. a '/\' (b '\/' c) = (a '/\' b) '\/' (b '/\' c)
+-- @
+--
+-- ==== Implication
+--
+-- Distributive bounded lattice is a Heyting algebra iff:
+--
+-- @
+-- ∀ a. a '-->' a = 'true'
+-- ∀ a b. a '/\' (a '-->' b) = a '/\' b
+-- ∀ a b. b '/\' (a '-->' b) = b
+-- ∀ a b c. a '-->' (b '/\' c) = (a '-->' b) '/\' (a '-->' c)    (distributivity)
+-- @
+--
+-- Ordering operation can be recovered from 'implication' ('-->') as:
+--
+-- @
+-- ∀ a b. a ≤ b ⇔ a '-->' b = 1
+-- @
+--
+-- ==== Negation
+--
+-- Negation is not a basic operation, it's defined as:
+--
+-- @
+-- ∀ a. 'neg' a = a '-->' 'false'
 -- @
 class HeytingAlgebra a where
     {-# MINIMAL
-          bottom, top, (negation | implication), conjunction, disjunction
+            bottom
+          , top
+          , (negation | implication)
+          , (conjunction | disjunction)
       #-}
 
     -- | Least element, behaves as neutral element for '\/' ('disjunction').
     --
     -- @
-    -- ∀ a b. 'bottom' ≤ a '\/' b
-    -- ∀ a. a '\/' 'bottom' ≡ 'bottom' '\/' a ≡ a
-    -- 'bottom' :: 'Bool' ≡ 'False'
+    -- ∀ a b. 'bottom' ≤ a '\/' b                (infimum)
+    -- ∀ a. a '\/' 'bottom' = 'bottom' '\/' a ≡ a    (identity)
+    -- 'bottom' :: 'Bool' = 'False'
     -- @
     --
     -- Aliases: 'ff' and 'false'.
+    --
+    -- If instance for 'Prelude.Bounded' is consistent with latice ordering,
+    -- then:
+    --
+    -- @
+    -- 'bottom' = 'Prelude.minBound'
+    -- @
     bottom :: a
 
     -- | Greatest element, behaves as neutral element for '/\' ('conjunction').
     --
     -- @
-    -- ∀ a b. a '/\' b ≤ 'top'
-    -- ∀ a. a '/\' 'top' ≡ 'top' '/\' a ≡ a
-    -- 'top' :: 'Bool' ≡ 'True'
+    -- ∀ a b. a '/\' b ≤ 'top'             (supremum)
+    -- ∀ a. a '/\' 'top' = 'top' '/\' a = a    (identity)
+    -- 'top' :: 'Bool' = 'True'
     -- @
     --
     -- Aliases: 'tt' and 'true'.
+    --
+    -- If instance for 'Prelude.Bounded' is consistent with latice ordering,
+    -- then:
+    --
+    -- @
+    -- 'top' = 'Prelude.maxBound'
+    -- @
     top :: a
 
-    -- |
+    -- | Operation of negation, also known as complement, but in Heyting
+    -- Algebra it's more known as pseudo-complement, because
+    -- @∀ a. a '/\' 'neg' a ≡ 'top'@ (law of excluded middle) is not generally
+    -- true. Bear in mind that there are Heyting algebras in which that is
+    -- true. Every Boolean algebra is Heyting algebra and for those law of
+    -- excluded middle holds.
+    --
+    -- Note that @∀ a. 'neg' ('neg' a) = a@ (double negation) doesn't hold
+    -- either, since it's equivalent to the law of excluded middle.
+    --
     -- Aliases: 'neg' and 'Data.HeytingAlgebra.not'.
     --
     -- Default implementation: @\\a -> a '-->' 'false'@
     negation :: a -> a
     negation = (`implication` bottom)
 
-    -- |
+    -- | Operation of conjunction, or also meet or infimum when we think about
+    -- lattice structure of Heyting algebra.
+    --
+    -- @
+    -- ∀ a b. a '/\' b = a '/\' b                    (commutativity),
+    -- ∀ a b c. a '/\' (b '/\' c) = (a '/\' b) '/\' c    (associativity)
+    -- ∀ a. a '/\' a = a                           (idempotency).
+    -- @
     --
     -- Aliases: '/\' and 'Data.HeytingAlgebra.&&'.
+    --
+    -- Default implication: @\\a b -> 'neg' ('neg' a '\/' 'neg' b)@
     conjunction :: a -> a -> a
+    conjunction a b = negation (negation a `disjunction` negation b)
 
-    -- |
+    -- | Operation of conjunction, or also join or supremum when we think about
+    -- lattice structure of Heyting algebra.
+    --
+    -- @
+    -- ∀ a b. a '\/' b = a '\/' b                    (commutativity),
+    -- ∀ a b c. a '\/' (b '\/' c) = (a '\/' b) '\/' c    (associativity)
+    -- ∀ a. a '\/' a = a                           (idempotency).
+    -- @
+    --
     -- Aliases: '\/' and 'Data.HeytingAlgebra.||'.
+    --
+    -- Default implication: @\\a b -> 'neg' ('neg' a '/\' 'neg' b)@
     disjunction :: a -> a -> a
+    disjunction a b = negation (negation a `conjunction` negation b)
 
-    -- |
+    -- | Operation of implication.
+    --
     -- Aliases: '-->'
     --
     -- Default implementation: @\\a b -> 'neg' (a '\/' b)@
     implication :: a -> a -> a
     implication a b = negation (a `disjunction` b)
 
-    -- |
+    -- | Operation of equivalence, i.e. biconditional. See also 'xor'
+    -- (exclusive or) operation.
     --
     -- @
-    -- a '<-->' b ≡ (a '-->' b) '/\' (b '-->' a)
+    -- a '<-->' b = (a '-->' b) '/\' (b '-->' a)
     -- @
     --
     -- Aliases: '<-->'
@@ -278,3 +352,13 @@ infixr 1 -->
 (<-->) :: HeytingAlgebra a => a -> a -> a
 (<-->) = biconditional
 infixr 0 <-->
+
+-- | Exclusive OR operation.
+--
+-- @
+-- ∀ a b. a ``xor`` b = 'neg' (a '<-->' b) = (a '\/' b) '/\' 'neg' (a '/\' b)
+-- @
+--
+-- Defined as: @\\a b -> (a '\/' b) '/\' 'neg' (a '/\' b)@
+xor :: HeytingAlgebra a => a -> a -> a
+xor a b = (a `disjunction` b) `conjunction` negation (a `conjunction` b)

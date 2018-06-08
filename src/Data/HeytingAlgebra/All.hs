@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeApplications #-}
 -- |
 -- Module:      Data.HeytingAlgebra.All
--- Description: TODO: Module synopsis
+-- Description: All data type which is a monoid under conjunction
 -- Copyright:   (c) 2018 Peter Trško
 -- License:     BSD3
 --
@@ -13,7 +13,8 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO
+-- `All` data type which is a monoid under `conjunction` ('/\',
+-- 'Data.HeytingAlgebra.&&') with `top` (`true`) as neutral element.
 module Data.HeytingAlgebra.All
     (
       All(..)
@@ -41,6 +42,8 @@ import Data.HeytingAlgebra.Class
 import Data.HeytingAlgebra.Internal
 
 
+-- | /Heyting Algebra/ monoid under `conjunction` (`/\`,
+-- `Data.HeytingAlgebra.&&`) with `top` (`true`) as neutral element.
 newtype All a = All {getAll :: a}
   deriving (Eq, Generic, Ord, Read, Show)
 
@@ -69,8 +72,17 @@ instance HeytingAlgebra a => HeytingAlgebra (All a) where
     disjunction = coerce (disjunction @a)
     implication = coerce (implication @a)
 
+-- | Conjunction of all emenents of a container.
+--
+-- >>> and ([] :: [Bool])
+-- True
+-- >>> and [True, False]
+-- False
+-- >>> and [odd, even] 1
+-- False
 and :: (Foldable t, HeytingAlgebra a) => t a -> a
 and = getAll #. foldMap All
 
+-- | Determines whether all elements of the structure satisfy the predicate.
 all :: (Foldable t, HeytingAlgebra b) => (a -> b) -> t a -> b
 all f = getAll #. foldMap (All #. f)

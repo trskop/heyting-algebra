@@ -5,7 +5,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 -- |
 -- Module:      Data.HeytingAlgebra.Any
--- Description: TODO: Module synopsis
+-- Description: Any data type which is a monoid under disjunction
 -- Copyright:   (c) 2018 Peter Trško
 -- License:     BSD3
 --
@@ -13,7 +13,8 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO
+-- 'Any' data type which is a monoid under `disjunction` ('\/',
+-- 'Data.HeytingAlgebra.||') with `bottom` (`false`) as neutral element.
 module Data.HeytingAlgebra.Any
     (
       Any(..)
@@ -41,6 +42,8 @@ import Data.HeytingAlgebra.Class
 import Data.HeytingAlgebra.Internal
 
 
+-- | /Heyting Algebra/ monoid under `disjunction` (`\/`,
+-- `Data.HeytingAlgebra.||`) with `bottom` (`false`) as neutral element.
 newtype Any a = Any {getAny :: a}
   deriving (Eq, Generic, Ord, Read, Show)
 
@@ -69,8 +72,17 @@ instance HeytingAlgebra a => HeytingAlgebra (Any a) where
     disjunction = coerce (disjunction @a)
     implication = coerce (implication @a)
 
+-- | Disjunction of all emenents of a container.
+--
+-- >>> or ([] :: [Bool])
+-- False
+-- >>> or [True, False]
+-- True
+-- >>> or [odd, even] 1
+-- True
 or :: (Foldable t, HeytingAlgebra a) => t a -> a
 or = getAny #. foldMap Any
 
+-- | Determines whether any element of the structure satisfies the predicate.
 any :: (Foldable t, HeytingAlgebra b) => (a -> b) -> t a -> b
 any f = getAny #. foldMap (Any #. f)
