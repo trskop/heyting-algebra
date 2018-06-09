@@ -162,3 +162,7 @@ toBool a
 --       'True'  '-->' 'False' = 'False'
 --       'True'  '-->' 'True'  = 'True'
 -- @
+
+-- $instances
+--
+-- **TODO**

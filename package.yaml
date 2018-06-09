@@ -24,12 +24,28 @@ extra-source-files:
   - ChangeLog.md
   - README.md
 
+flags:
+  pedantic:
+    description: Pass additional warning flags to GHC along with -Werror.
+    manual: true
+    default: false
+
 dependencies:
-  - base
-  - contravariant
+  - base >=4.9 && <5
+  # ^ We depend on "Data.Functor.Classes" which was introduced in base 4.9.0.0.
+
+  - contravariant >=0.1 && <2
+  # ^ We depend on Predicate and Equilvalence types, which were there from the
+  # start.
 
 ghc-options:
   - -Wall
+
+when:
+  - condition: flag(pedantic)
+    ghc-options:
+      - -Wimplicit-prelude
+      - -Werror
 
 library:
   source-dirs: src
