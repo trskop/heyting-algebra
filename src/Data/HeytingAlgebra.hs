@@ -15,15 +15,23 @@
 -- We can think of /Heyting algebra/ as a generalisation of 'Bool' and its
 -- boolean operations. The advantage is that we get other instances for
 -- 'HeytingAlgebra' that are useful in practical programming. See
--- [HeytingAlgebra Instances](#g:2) section for usage examples.
+-- [HeytingAlgebra Instances](#g:2) section for some examples.
 module Data.HeytingAlgebra
     (
     -- * Heyting Algebra
+    --
     -- $heytingAlgebra
       module Data.HeytingAlgebra.Class
 
     -- * HeytingAlgebra Instances
-    -- $instances
+
+    -- ** HeytingAlgebra Bool
+    --
+    -- $boolInstance
+
+    -- ** Other Instances
+    --
+    -- $otherInstances
     , module Data.HeytingAlgebra.All
     , module Data.HeytingAlgebra.Any
 
@@ -78,7 +86,7 @@ fromBool = \case
 -- | Projection from 'HaytingAlgebra' into three-value set.
 --
 -- @
--- ∀ a. 'HeytingAlgebra' a => 'toBool' @a . 'fromBool' @a ≡ 'Just' @Bool
+-- ∀ a. 'HeytingAlgebra' a => 'toBool' @a . 'fromBool' @a = 'Just' @Bool
 --
 -- ∀ (a :: Type) (b :: Type). ('HeytingAlgebra' a, 'HeytingAlgebra' b) =>
 --   'fromBool' \@b ('toBool' \@a 'false') = 'Just' \@b 'false'
@@ -110,11 +118,11 @@ toBool a
 -- 'implication' ≡ ('-->') :: 'HaytingAlgebra' => a -> a -> a
 -- 'biconditional' ≡ ('<-->') :: 'HaytingAlgebra' => a -> a -> a
 -- @
---
--- == Relation with Bool
+
+-- $boolInstance
 --
 -- 'Bool' type with 'Data.Bool.not', 'Data.Bool.&&', and 'Data.Bool.||' is
--- an example of 'HeytingAlgebra':
+-- the most basic example of 'HeytingAlgebra':
 --
 -- @
 -- 'bottom' ≡ 'false' ≡ 'ff' ≡ 'False' :: 'Bool'
@@ -163,6 +171,29 @@ toBool a
 --       'True'  '-->' 'True'  = 'True'
 -- @
 
--- $instances
+-- $otherInstances
 --
--- **TODO**
+-- Important instances:
+--
+-- [@instance 'HeytingAlgebra' b => 'HeytingAlgebra' (a -> b)@]:
+--   Simple predicates, e.g.
+--   @
+--   isCrOrLf = ('==' \'\\r\') '\/' ('==' \'\\n\') :: 'Data.Char.Char' -> 'Bool'
+--   @
+--
+-- [@instance 'HeytingAlgebra' ('Data.Functor.Contravariant.Predicate' a)@]:
+--   Same as @'HeytingAlgebra' b => 'HeytingAlgebra' (a -> b)@, but wrapped in
+--   a newtype called 'Data.Functor.Contravariant.Predicate'.
+--
+-- [@instance 'HeytingAlgebra' ('Data.Functor.Contravariant.Equivalence' a)@]:
+--   Same as
+--   @'HeytingAlgebra' b => 'HeytingAlgebra' (a -> 'Data.Functor.Contravariant.Predicate' a)@,
+--   but wrapped in a newtype called 'Data.Functor.Contravariant.Equivalence'.
+--
+-- [@instance 'HeytingAlgebra' a => 'HeytingAlgebra' ('All' a)@]:
+--   Monoid under `conjunction` (`/\`, `Data.HeytingAlgebra.&&`) with `top`
+--   (`true`) as neutral element.
+--
+-- [@instance 'HeytingAlgebra' a => 'HeytingAlgebra' ('Any' a)@]:
+--   Monoid under `disjunction` (`\/`, `Data.HeytingAlgebra.||`) with `bottom`
+--   (`false`) as neutral element.

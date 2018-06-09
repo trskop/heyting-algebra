@@ -22,10 +22,12 @@ module Data.HeytingAlgebra.Internal
 import Data.Coerce (Coercible, coerce)
 
 
+-- | **Unsafe function, use with caution!**
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
 (#.) _ = coerce
 {-# INLINE (#.) #-}
 
+-- | **Unsafe function, use with caution!**
 coerce2
   :: forall f t a b
   .  Coercible (f a -> f b) (t a -> t b)
