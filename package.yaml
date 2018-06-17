@@ -1,4 +1,4 @@
-name: heyting-algebra
+name: &this heyting-algebra
 version: 0.1.0.0
 synopsis: Heyting algebra
 category: Data
@@ -51,3 +51,21 @@ library:
   source-dirs: src
   other-modules:
     - Data.HeytingAlgebra.Internal
+
+tests:
+  unit-tests:
+    source-dirs: test/unit
+    main: Main.hs
+    dependencies:
+      - *this
+
+      - QuickCheck
+      - tasty
+      - tasty-quickcheck
+
+  hlint-tests:
+    source-dirs: test/hlint
+    main: Main.hs
+    dependencies:
+      - hlint
+      - hlint-test

@@ -6,6 +6,8 @@ resolver: lts-11.12
 packages:
   - .
 
-# extra-deps: []
+extra-deps:
+  - hlint-test-0.1.0.0
+
 flags:
   heyting-algebra: {pedantic: true}
